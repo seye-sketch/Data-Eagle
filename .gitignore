@@ -1,0 +1,29 @@
+# Secrets
+credentials.json
+.env
+*.env
+
+# Cache
+__pycache__/
+*.pyc
+*.db
+
+# Data files
+sales_data.csv
+sales_report.png
+report.txt
+latest_report.txt
+severe_alert.txt
+severe.log
+cron.log
+
+# Memory (contains owner notes, not code)
+memory.json
+
+# Old scripts
+run_datawtch.py
+detect_anomalies.py
+generate_chart.py
+generate_report.py
+run_datawatch.py
+upload_to_sheets.py
