@@ -102,16 +102,16 @@ WHATSAPP_HOME_CHANNEL=your_whatsapp_channel_id
 ```
 
 ### 4. Running the Agent
-Run a simulated daily cycle to generate sales data and check for anomalies:
+Run the simulated daily data generator and scheduled monitor tasks:
 ```bash
-# Generate simulated historical data
+# Generate simulated historical sales data
 python3 generate_data.py
 
-# Upload local CSV data to Google Sheets
-python3 upload_to_sheets.py
+# Check for severe anomalies (run on cron)
+python3 check_severe.py
 
-# Run the anomaly detection agent
-python3 run_datawatch.py
+# Run the weekly business intelligence recap
+python3 run_weekly.py
 ```
 
 ---
@@ -121,22 +121,11 @@ python3 run_datawatch.py
 ```directory
 datawatch/
 ├── datawatch_agent/
-│   ├── .env                    # Environment variables (Google API keys, WhatsApp configs)
 │   └── agent.py                # Main Google ADK Agent definition and tool bindings
 ├── check_severe.py             # Scheduled monitor to check for critical drops (WhatsApp trigger)
-├── detect_anomalies.py         # core anomaly detection logic using Gemini 3.5 Flash
-├── generate_chart.py           # Matplotlib visualization script for sales reports
 ├── generate_data.py            # Simulates 90-day transaction history for Suya spots
-├── generate_report.py          # Formats and writes structured business performance summaries
-├── run_datawatch.py            # Central entry point for executing the daily autonomous cycle
 ├── run_weekly.py               # Handles compiling and sending the weekly recap
-├── upload_to_sheets.py         # Syncs local CSV sales data to Google Sheets
-├── credentials.json            # Google Service Account authentication file
-├── sales_data.csv              # Raw transaction logs for Ikeja, Surulere, and Lekki spots
-├── sales_report.png            # Automatically generated sales trend chart
-├── severe_alert.txt            # Cached severe anomaly alert payload
-├── severe.log                  # Historical execution log for severe alerts
-├── memory.json                 # Agent state and context preservation across runs
+├── .gitignore                  # Git ignore configurations
 └── README.md                   # Project documentation
 ```
 
