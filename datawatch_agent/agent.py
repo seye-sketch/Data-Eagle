@@ -1,4 +1,6 @@
 import pandas as pd
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from datetime import datetime
 import gspread
@@ -7,6 +9,7 @@ from google.adk.agents import Agent
 from google import genai
 import os
 import json
+import subprocess
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -17,6 +20,7 @@ SCOPES = [
 ]
 
 MEMORY_FILE = "/home/seyealadekomo/datawatch/memory.json"
+WHATSAPP_TARGET = "whatsapp:Seye"
 
 def get_sheet_data():
     creds = Credentials.from_service_account_file(
@@ -62,28 +66,19 @@ def analyze_sales() -> dict:
     memory = load_memory()
     memory_text = ""
     if memory:
-        memory_text = "\nOWNER NOTES (from previous explanations):\n"
+        memory_text = "\nOWNER NOTES:\n"
         for key, explanation in memory.items():
             memory_text += f"- {explanation}\n"
         memory_text += "\nTake these notes into account before flagging anomalies.\n"
 
     prompt = f"""You are a business intelligence assistant analyzing sales data for a Nigerian suya business with 3 branches.
 
-Note: Nigeria has public holidays where sales drop significantly. Consider this before flagging low sales as anomalies.
-
 {profile}
 {memory_text}
 TODAY'S SALES ({today_str}):
 {today_text}
 
-Based on the business profile above, identify any anomalies in today's sales.
-For each anomaly, state:
-- Branch name
-- Hour
-- Sales amount
-- Why it is unusual compared to the historical pattern
-
-Be concise. If nothing is unusual, say so."""
+Identify any anomalies in today's sales. For each anomaly state the branch, hour, sales amount, and why it is unusual. Be concise. If nothing is unusual, say so."""
 
     ai_client = genai.Client(api_key=os.environ["GOOGLE_API_KEY"])
     response = ai_client.models.generate_content(
@@ -131,7 +126,7 @@ def generate_chart() -> str:
     return f"Chart saved to {chart_path}"
 
 def generate_report() -> str:
-    """Generates a WhatsApp-formatted report with Gemini's analysis."""
+    """Generates a WhatsApp-formatted report and sends an alert if anomalies are detected."""
     data = analyze_sales()
     today = datetime.now().strftime("%B %d, %Y")
 
@@ -156,6 +151,28 @@ def generate_report() -> str:
 ━━━━━━━━━━━━━━━
 🤖 _DataWatch Agent • Auto-generated_
 """
+
+    analysis_lower = data['gemini_analysis'].lower()
+    is_anomaly = any(word in analysis_lower for word in [
+        "anomaly", "unusual", "severe", "drop", "below", "unexpected"
+    ])
+
+    if is_anomaly:
+        alert = f"""🚨 *DATAWATCH ANOMALY ALERT*
+📅 {data['today_date']}
+
+{data['gemini_analysis']}
+
+━━━━━━━━━━━━━━━
+🤖 _DataWatch Agent • Auto-generated_"""
+
+        subprocess.run(["hermes", "send", "--to", WHATSAPP_TARGET, alert])
+        subprocess.run([
+            "hermes", "send", "--to", WHATSAPP_TARGET,
+            "MEDIA:/home/seyealadekomo/datawatch/sales_report.png"
+        ])
+        print("🚨 Anomaly detected — WhatsApp alert sent!")
+
     return report
 
 def remember(explanation: str) -> str:
@@ -177,7 +194,7 @@ root_agent = Agent(
 You have four tools:
 - analyze_sales: uses Gemini AI to detect anomalies contextually against 90-day history
 - generate_chart: creates a visual chart comparing today vs historical average
-- generate_report: produces a full WhatsApp-ready business report
+- generate_report: produces a full WhatsApp-ready business report and automatically sends WhatsApp alerts if anomalies are detected
 - remember: saves owner explanations to memory for future analyses
 
 When asked to analyze sales or generate a report, always:
