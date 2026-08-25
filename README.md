@@ -33,23 +33,7 @@ Imagine **Tunde**, a small business owner in Lagos, Nigeria. Tunde runs **three 
 
 ##  Architecture
 
-DataWatch's lightweight and cost-effective architecture is built on the Google Cloud stack:
-
-```
-[ Google Sheets ] ──(Sync)──> [ Python / gspread ]
-                                     │
-                             (Fetch Sales Data)
-                                     ▼
-[ Google Cloud Run ] ──> [ Google Agentic SDK (ADK) ]
-                                     │
-                             (Reason / Detect)
-                                     ▼
-                        [ Gemini 3.5 Flash Model ]
-                                     │
-                             (Analyze Anomalies)
-                                     ▼
-[ WhatsApp Gateway ] <───(Alerts)─── [ DataWatch Agent ]
-```
+![DataWatch Architecture Diagram](assets/architecture.png)
 
 - **Google Agentic SDK (ADK):** Powers the autonomous agent loop, managing tool bindings and memory across runs.
 - **Gemini 3.5 Flash:** Provides lightning-fast, high-quality reasoning to analyze sales data and formulate context-aware explanations.
