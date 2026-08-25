@@ -91,11 +91,11 @@ Run the simulated daily data generator and scheduled monitor tasks:
 # Generate simulated historical sales data
 python3 generate_data.py
 
-# Check for severe anomalies (run on cron)
-python3 check_severe.py
+# Inject live anomaly for testing
+python3 inject_anomaly.py
 
-# Run the weekly business intelligence recap
-python3 run_weekly.py
+# Run the DataWatch Agent loop
+adk run datawatch_agent
 ```
 
 ---
@@ -108,6 +108,7 @@ datawatch/
 │   └── agent.py                # Main Google ADK Agent definition and tool bindings
 ├── check_severe.py             # Scheduled monitor to check for critical drops (WhatsApp trigger)
 ├── generate_data.py            # Simulates 90-day transaction history for Suya spots
+├── inject_anomaly.py           # Demo script to inject a live anomaly into Google Sheets for testing
 ├── run_weekly.py               # Handles compiling and sending the weekly recap
 ├── .gitignore                  # Git ignore configurations
 └── README.md                   # Project documentation
@@ -121,7 +122,6 @@ datawatch/
 - **[Gemini 3.5 Flash](https://deepmind.google/technologies/gemini/):** High-throughput reasoning, data analysis, and report generation.
 - **[Google Sheets API (via gspread)](https://github.com/burnash/gspread):** Cloud data synchronization.
 - **[Matplotlib](https://matplotlib.org/):** Business intelligence chart and trend rendering.
-- **[Flask](https://flask.palletsprojects.com/):** Optional web UI/webhook service for Cloud Run routing.
 - **[Cloud Run](https://cloud.google.com/run):** Fully managed, serverless execution platform.
 
 ---
