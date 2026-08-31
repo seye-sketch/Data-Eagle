@@ -31,7 +31,7 @@ Imagine **Tunde**, a small business owner in Lagos, Nigeria. Tunde runs **three 
 
 ---
 
-##  Architecture
+## Architecture
 
 ![DataWatch Architecture Diagram](assets/architecture.png)
 
@@ -56,47 +56,55 @@ Imagine **Tunde**, a small business owner in Lagos, Nigeria. Tunde runs **three 
 
 ---
 
-##  Setup Instructions
+## Setup Instructions
 
-### Prerequisites
-- Python 3.11+
-- A Google Cloud Project with the **Sheets API**, **Drive API**, and **Vertex AI / Gemini API** enabled.
-- A WhatsApp API / Gateway account (or Sandbox) for alerts.
+Follow these exact steps to set up and run the DataWatch agent locally:
 
-### 1. Installation
-Clone the repository and install dependencies:
-```bash
-git clone https://github.com/seye-sketch/Data-Eagle.git
-cd Data-Eagle
-pip install -r requirements.txt
-```
+1. **Clone the Repository:**
+   ```bash
+   git clone https://github.com/seye-sketch/Data-Eagle.git
+   cd Data-Eagle
+   ```
 
-### 2. Authentication Setup
-- Create a **Service Account** in the Google Cloud Console.
-- Download the credentials file and save it as **`credentials.json`** in the project root directory.
-- Share your Google Sheet with the Service Account email.
+2. **Install Dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-### 3. Environment Variables
-Create a `.env` file in `datawatch_agent/.env` (and/or in the root) with the following values:
-```env
-GOOGLE_API_KEY=your_gemini_api_key_here
-GEMINI_API_KEY=your_gemini_api_key_here
-WHATSAPP_ENABLED=true
-WHATSAPP_HOME_CHANNEL=your_whatsapp_channel_id
-```
+3. **Add Google Cloud Credentials:**
+   Add your Google Cloud service account key file to the project root directory and name it `credentials.json`. Ensure the service account has access to your Google Sheet.
 
-### 4. Running the Agent
-Run the simulated daily data generator and scheduled monitor tasks:
-```bash
-# Generate simulated historical sales data
-python3 generate_data.py
+4. **Configure Environment Variables:**
+   Create a `.env` file at `datawatch_agent/.env` with your Google Gemini API key:
+   ```env
+   GOOGLE_API_KEY=your_key
+   ```
 
-# Inject live anomaly for testing
-python3 inject_anomaly.py
+5. **Generate Baseline Historical Data:**
+   ```bash
+   python3 generate_data.py
+   ```
 
-# Run the DataWatch Agent loop
-adk run datawatch_agent
-```
+6. **Inject a Test Anomaly:**
+   ```bash
+   python3 inject_anomaly.py
+   ```
+
+7. **Run the DataWatch Agent Loop:**
+   ```bash
+   adk run datawatch_agent
+   ```
+
+---
+
+## Testing Instructions
+
+To verify that the DataWatch anomaly detection and alerting workflow is operating correctly, follow this step-by-step test procedure:
+
+1. **Verify Baseline Data:** Ensure that step 5 of the setup was run, creating the Google Sheets sales history.
+2. **Inject Test Anomaly:** Run `python3 inject_anomaly.py`. This script simulates a point-of-sale failure at the Lekki branch during peak lunch hours, injecting a severely low sale amount (e.g., ₦200) directly into your transaction sheet.
+3. **Execute Anomaly Scan:** Run the ADK agent loop using `adk run datawatch_agent` or run `python3 check_severe.py`.
+4. **Inspect Alert Logs:** Check your terminal output and logs (or connected WhatsApp gateway). You should see that the agent successfully retrieved the transaction, flagged the 99% sales drop using Gemini reasoning, and triggered a severe anomaly alert with the specific branch details and suggested resolutions.
 
 ---
 
@@ -105,18 +113,19 @@ adk run datawatch_agent
 ```directory
 datawatch/
 ├── datawatch_agent/
-│   └── agent.py                # Main Google ADK Agent definition and tool bindings
-├── check_severe.py             # Scheduled monitor to check for critical drops (WhatsApp trigger)
-├── generate_data.py            # Simulates 90-day transaction history for Suya spots
-├── inject_anomaly.py           # Demo script to inject a live anomaly into Google Sheets for testing
-├── run_weekly.py               # Handles compiling and sending the weekly recap
-├── .gitignore                  # Git ignore configurations
+│   └── agent.py                # Main Google ADK Agent with four tools: analyze_sales, generate_chart, generate_report, remember
+├── check_severe.py             # Hourly severe anomaly checker with WhatsApp alert
+├── generate_data.py            # Simulates 90-day historical sales data for Ikeja, Surulere, Lekki
+├── inject_anomaly.py           # Demo script to inject a live anomaly for testing
+├── run_weekly.py               # Weekly report generator and WhatsApp sender
+├── .env.example                # Environment variable template
+├── .gitignore
 └── README.md                   # Project documentation
 ```
 
 ---
 
-##  Built With
+## Built With
 
 - **[Google Agentic SDK (ADK)](https://github.com/google/agentic-sdk):** Autonomous agent loop, scheduling, and tool binding.
 - **[Gemini 3.5 Flash](https://deepmind.google/technologies/gemini/):** High-throughput reasoning, data analysis, and report generation.
@@ -127,6 +136,7 @@ datawatch/
 ---
 
 ## License
+
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
